@@ -1,0 +1,205 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 30 14:12:50 2017
+
+@author: techinar
+"""
+
+import requests
+import json
+from functools import lru_cache
+from retrying import retry
+
+summoners = ['causalmtg', 'Exarz', 'Manwax5', 'I Have Talont', 'Bubble Buttt', 'Labguy90', 'C9 Gun', 'Singlelift', 'Faker']
+print(summoners)
+
+
+api_key = 'RGAPI-e2cf4639-970e-4886-8556-e622b392cb75'
+
+base_url = 'https://na.api.pvp.net/api/lol/na/'
+urls = dict(summoner_id=base_url + 'v1.4/summoner/by-name/%s?api_key=%s',
+            recent_matches=base_url + 'v1.3/game/by-summoner/%d/recent?api_key=%s')
+
+@lru_cache(maxsize = 100)
+def get_summoner_id(summoner_name):
+    summoner_name = summoner_name.lower().replace(' ', '')
+    url = urls['summoner_id'] % (summoner_name, api_key)
+    
+    print("                                                                                                                                                                ",summoner_name, "                                                                                                                                                                ")
+    summoner_info = lol_request(url)
+    
+    return summoner_info[summoner_name]['id']
+
+@retry(wait_fixed = 10)
+def get_recent_games(summoner_id):
+    url = urls['recent_matches'] % (summoner_id, api_key)
+
+    recent_game_info = lol_request(url)
+    return recent_game_info
+
+@retry(wait_fixed = 10)
+def lol_request(url):
+    request_info = requests.get(url)
+    if request_info.status_code != 200:
+        raise ValueError('Rate limit exceeded')
+
+    return request_info.json()
+
+def update_game_data(summoner_name):
+    f = open('previous_gamesn.json', 'r')
+    previous_raw_data = f.read()
+    if not previous_raw_data:
+        setup_initial_data(get_recent_games(get_summoner_id(summoner_name)))
+    else:
+        return update_data(json.loads(previous_raw_data))
+
+def setup_initial_data(data):
+    game_ids = [game['gameId'] for game in data['games']]
+
+    data['game_ids'] = game_ids
+
+    f = open('previous_gamesn.json', 'w')
+    f.write(json.dumps(data, indent = 4))
+
+def update_data(data):
+    summoner_id = data['summonerId']
+
+    recent_games = get_recent_games(summoner_id)
+    game_ids = [game['gameId'] for game in recent_games['games']]
+    
+    new_games = list(set(game_ids) - set(data['game_ids']))
+    for game in new_games:
+        g = [new_game for new_game in recent_games['games'] if new_game['gameId'] == game]
+        data['games'].append(g[0])
+
+    data['game_ids'] = data['game_ids'] + new_games
+    f = open('previous_gamesn.json', 'w')
+    f.write(json.dumps(data, indent = 4))
+    if new_games:
+        return new_games
+    else:
+        return 'No new games added'
+
+if __name__ == '__main__':   
+    for names in summoners:  
+        setup_initial_data(get_recent_games(get_summoner_id(names)))
+        with open('previous_gamesn.json') as data_file:    
+            data = json.load(data_file)
+            def get_data():
+                with open('previous_gamesn.json') as data_file:    
+                    data = json.load(data_file)                                
+                
+                print('                                                                                              ')
+                sum = 0
+                count = 0
+                for i in range(10):
+                    game = data["games"][i]
+                    if 'championsKilled' in game['stats']:
+                        sum += game['stats']['championsKilled']
+                        count += 1
+                    else:
+                        count += 0
+                print('Average', count, 'games Kills')
+                k = sum / count
+                print (k)
+                
+                
+                sum = 0
+                count = 0
+                for i in range(10):
+                    game = data["games"][i]
+                    if 'numDeaths' in game['stats']:
+                        sum += game['stats']['numDeaths']
+                        count += 1
+                    else:
+                        count += 0
+                print('Average', count, 'games Deaths')
+                d = sum / count
+                print(d)
+                
+                sum = 0
+                count = 0
+                for i in range(10):
+                    game = data["games"][i]
+                    if 'assists' in game['stats']:
+                        sum += game['stats']['assists']
+                        count += 1
+                    else:
+                        count += 0
+                print('Average', count, 'games Assists')
+                a = sum / count
+                print(a)
+                
+                s = ((k + a) / d)
+                       #kda is s#                
+                print('KDA')
+                print(s)
+                
+                sum = 0
+                count = 0
+                for i in range(10):
+                    game = data["games"][i]
+                    if 'totalDamageDealt' in game['stats']:
+                        sum += game['stats']['totalDamageDealt']
+                        count += 1
+                    else:
+                        count += 0
+                print('Average', count, 'games Damage Dealt')
+                print(sum / count)
+                
+                sum = 0
+                count = 0
+                for i in range(10):
+                    game = data["games"][i]
+                    if 'goldEarned' in game['stats']:
+                        sum += game['stats']['goldEarned']
+                        count += 1
+                    else:
+                        count += 0
+                print('Average', count, 'games Gold Earned')
+                print(sum / count)
+                
+                for i in range(10):
+                    game = data["games"][i]
+                    if "playerRole" in game['stats']:                  
+                        print(game['stats']["playerRole"])
+                    else:
+                        print('data missing')
+                        
+                
+                count1 = 0
+                count2 = 0
+                count3 = 0
+                count4 = 0
+                count5 = 0
+                for i in range(10):
+                    game = data["games"][i]
+                    if "playerRole" in game['stats']:
+                        if game['stats']["playerRole"] == 1:
+                            count1 += 1
+                        elif game['stats']["playerRole"] == 2:
+                            count2 += 1 
+                        elif game['stats']["playerRole"] == 3:
+                            count3 += 1 
+                        elif game['stats']["playerRole"] == 4:
+                            count4 += 1 
+                        else: 
+                            count5 += 1
+                        
+                print( count1, count2, count3, count4, count5)
+                
+                max_count =max(count1, count2, count3, count4, count5)                    
+                if max_count == count1:
+                    print(1)
+                elif max_count == count2:
+                    print(2)
+                elif max_count == count3:
+                    print(3)
+                elif max_count == count4:
+                    print(4)
+                else:
+                    print(5)
+
+            get_data()
+
+ 
