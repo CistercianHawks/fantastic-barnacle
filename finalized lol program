@@ -159,12 +159,7 @@ if __name__ == '__main__':
                 print('Average', count, 'games Gold Earned')
                 print(sum / count)
                 
-                for i in range(10):
-                    game = data["games"][i]
-                    if "playerRole" in game['stats']:                  
-                        print(game['stats']["playerRole"])
-                    else:
-                        print('data missing')
+                
                         
                 
                 count1 = 0
@@ -174,7 +169,7 @@ if __name__ == '__main__':
                 count5 = 0
                 for i in range(10):
                     game = data["games"][i]
-                    if "playerRole" in game['stats']:
+                    if 'playerRole' in game['stats']:
                         if game['stats']["playerRole"] == 1:
                             count1 += 1
                         elif game['stats']["playerRole"] == 2:
@@ -183,12 +178,12 @@ if __name__ == '__main__':
                             count3 += 1 
                         elif game['stats']["playerRole"] == 4:
                             count4 += 1 
-                        else: 
-                            count5 += 1
+                    if 'playerRole' not in game['stats']: 
+                        count5 += 1
                         
-                print( count1, count2, count3, count4, count5)
+                print('Most common player role')
                 
-                max_count =max(count1, count2, count3, count4, count5)                    
+                max_count = max(count1, count2, count3, count4, count5)                    
                 if max_count == count1:
                     print(1)
                 elif max_count == count2:
@@ -199,7 +194,15 @@ if __name__ == '__main__':
                     print(4)
                 else:
                     print(5)
-
+                
+                for i in range(10):
+                    game = data["games"][i]
+                    Damage = (game['stats']['totalDamageDealt'])/100000
+                    Gold = (game['stats']['goldEarned'])/100000
+                    player_score = (s) + Damage + Gold
+                print(player_score)
+                print(Damage)
+                print(Gold)
+                print(s)
+     
             get_data()
-
- 
