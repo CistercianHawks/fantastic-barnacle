@@ -10,9 +10,13 @@ import json
 from functools import lru_cache
 from retrying import retry
 
-summoners = ['causalmtg', 'Exarz', 'Manwax5', 'I Have Talont', 'Bubble Buttt', 'Labguy90', 'C9 Gun', 'Singlelift', 'Faker']
-print(summoners)
+team1 = ['Manwax5', 'C9 Ray', 'xAnubisDarkx', 'Agonistic', 'Son of kaSing']
+team2 = ['C9 Gun', 'I have Talont', 'Longzhu Cuzz', 'Abyss Looch', 'SKT T1 Peanut']
 
+print('team 1', '\t', team1)
+print('team 2', '\t', team2)
+
+summoners = team1 + team2
 
 api_key = 'RGAPI-e2cf4639-970e-4886-8556-e622b392cb75'
 
@@ -80,129 +84,165 @@ def update_data(data):
     else:
         return 'No new games added'
 
-if __name__ == '__main__':   
-    for names in summoners:  
+
+def get_data():
+    with open('previous_gamesn.json') as data_file:    
+        data = json.load(data_file)                                
+    
+    print('                                                                                              ')
+    sum = 0
+    count = 0
+    for i in range(10):
+        game = data["games"][i]
+        if 'championsKilled' in game['stats']:
+            sum += game['stats']['championsKilled']
+            count += 1
+        else:
+            count += 0
+    print('Average', count, 'games Kills')
+    k = sum / count
+    print (k)
+    
+    
+    sum = 0
+    count = 0
+    for i in range(10):
+        game = data["games"][i]
+        if 'numDeaths' in game['stats']:
+            sum += game['stats']['numDeaths']
+            count += 1
+        else:
+            count += 0
+    print('Average', count, 'games Deaths')
+    d = sum / count
+    print(d)
+    
+    sum = 0
+    count = 0
+    for i in range(10):
+        game = data["games"][i]
+        if 'assists' in game['stats']:
+            sum += game['stats']['assists']
+            count += 1
+        else:
+            count += 0
+    print('Average', count, 'games Assists')
+    a = sum / count
+    print(a)
+    
+    s = ((k + a) / d)
+           #kda is s#                
+    print('KDA')
+    print(s)
+    
+    sum = 0
+    count = 0
+    for i in range(10):
+        game = data["games"][i]
+        if 'totalDamageDealt' in game['stats']:
+            sum += game['stats']['totalDamageDealt']
+            count += 1
+        else:
+            count += 0
+    print('Average', count, 'games Damage Dealt')
+    D = sum / count
+    print(D)
+    
+    sum = 0
+    count = 0
+    for i in range(10):
+        game = data["games"][i]
+        if 'goldEarned' in game['stats']:
+            sum += game['stats']['goldEarned']
+            count += 1
+        else:
+            count += 0
+    print('Average', count, 'games Gold Earned')
+    G = sum / count
+    print(G)
+                                            
+    
+    count1 = 0
+    count2 = 0
+    count3 = 0
+    count4 = 0
+    count5 = 0
+    for i in range(10):
+        game = data["games"][i]
+        if 'playerRole' in game['stats']:
+            if game['stats']["playerRole"] == 1:
+                count1 += 1
+            elif game['stats']["playerRole"] == 2:
+                count2 += 1 
+            elif game['stats']["playerRole"] == 3:
+                count3 += 1 
+            elif game['stats']["playerRole"] == 4:
+                count4 += 1 
+        if 'playerRole' not in game['stats']: 
+            count5 += 1
+            
+    print('Most common player role')
+    
+    max_count = max(count1, count2, count3, count4, count5)                    
+    if max_count == count1:
+        print(1)
+    elif max_count == count2:
+        print(2)
+    elif max_count == count3:
+        print(3)
+    elif max_count == count4:
+        print(4)
+    else:
+        print(5)
+
+    for i in range(10):
+        game = data["games"][i]
+        Gold = (G - 8000) / 1000
+        if max_count == count2:
+            Damage = 1
+        else:
+            Damage = (D - 120000) / 10000
+        
+    print(Damage)
+    print(Gold)
+    player_score = s + Damage + Gold
+    
+    print('Player Score')
+    print(player_score)            
+    
+    return player_score
+
+
+if __name__ == '__main__':
+    teamscore1 = 0
+    for names in team1:  
         setup_initial_data(get_recent_games(get_summoner_id(names)))
         with open('previous_gamesn.json') as data_file:    
             data = json.load(data_file)
-            def get_data():
-                with open('previous_gamesn.json') as data_file:    
-                    data = json.load(data_file)                                
-                
-                print('                                                                                              ')
-                sum = 0
-                count = 0
-                for i in range(10):
-                    game = data["games"][i]
-                    if 'championsKilled' in game['stats']:
-                        sum += game['stats']['championsKilled']
-                        count += 1
-                    else:
-                        count += 0
-                print('Average', count, 'games Kills')
-                k = sum / count
-                print (k)
-                
-                
-                sum = 0
-                count = 0
-                for i in range(10):
-                    game = data["games"][i]
-                    if 'numDeaths' in game['stats']:
-                        sum += game['stats']['numDeaths']
-                        count += 1
-                    else:
-                        count += 0
-                print('Average', count, 'games Deaths')
-                d = sum / count
-                print(d)
-                
-                sum = 0
-                count = 0
-                for i in range(10):
-                    game = data["games"][i]
-                    if 'assists' in game['stats']:
-                        sum += game['stats']['assists']
-                        count += 1
-                    else:
-                        count += 0
-                print('Average', count, 'games Assists')
-                a = sum / count
-                print(a)
-                
-                s = ((k + a) / d)
-                       #kda is s#                
-                print('KDA')
-                print(s)
-                
-                sum = 0
-                count = 0
-                for i in range(10):
-                    game = data["games"][i]
-                    if 'totalDamageDealt' in game['stats']:
-                        sum += game['stats']['totalDamageDealt']
-                        count += 1
-                    else:
-                        count += 0
-                print('Average', count, 'games Damage Dealt')
-                print(sum / count)
-                
-                sum = 0
-                count = 0
-                for i in range(10):
-                    game = data["games"][i]
-                    if 'goldEarned' in game['stats']:
-                        sum += game['stats']['goldEarned']
-                        count += 1
-                    else:
-                        count += 0
-                print('Average', count, 'games Gold Earned')
-                print(sum / count)
-                
-                
-                        
-                
-                count1 = 0
-                count2 = 0
-                count3 = 0
-                count4 = 0
-                count5 = 0
-                for i in range(10):
-                    game = data["games"][i]
-                    if 'playerRole' in game['stats']:
-                        if game['stats']["playerRole"] == 1:
-                            count1 += 1
-                        elif game['stats']["playerRole"] == 2:
-                            count2 += 1 
-                        elif game['stats']["playerRole"] == 3:
-                            count3 += 1 
-                        elif game['stats']["playerRole"] == 4:
-                            count4 += 1 
-                    if 'playerRole' not in game['stats']: 
-                        count5 += 1
-                        
-                print('Most common player role')
-                
-                max_count = max(count1, count2, count3, count4, count5)                    
-                if max_count == count1:
-                    print(1)
-                elif max_count == count2:
-                    print(2)
-                elif max_count == count3:
-                    print(3)
-                elif max_count == count4:
-                    print(4)
-                else:
-                    print(5)
-                
-                for i in range(10):
-                    game = data["games"][i]
-                    Damage = (game['stats']['totalDamageDealt'])/100000
-                    Gold = (game['stats']['goldEarned'])/100000
-                    player_score = (s) + Damage + Gold
-                print(player_score)
-                print(Damage)
-                print(Gold)
-                print(s)
-     
-            get_data()
+
+
+            teamscore1 += get_data()
+    print('                                                                                                                           ', 'Team 1 Score')
+    print(teamscore1)
+    
+    teamscore2 = 0
+    for names in team2:  
+        setup_initial_data(get_recent_games(get_summoner_id(names)))
+        with open('previous_gamesn.json') as data_file:    
+            data = json.load(data_file)
+
+
+            teamscore2 += get_data()
+    print('                                                                                                                            ', 'Team 2 Score')    
+    print(teamscore2)
+    
+if teamscore1 > teamscore2:
+    print('Team 1 wins')
+elif teamscore1 < teamscore2:
+    print('Team 2 wins')
+else:
+    print('Team Score 1 = Team Score 2')
+    
+    
+    
+    
